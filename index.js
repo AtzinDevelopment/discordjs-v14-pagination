@@ -8,7 +8,7 @@ const { ActionRowBuilder, ButtonStyle, ButtonBuilder, EmbedBuilder } = require("
  * @param {number} timeout The time the user has to press a button before the embed is deleted. Defaults to 60000 ms (1 minute). Must be a number greater than 0
  * @param {string} footer The footer to use. Defaults to "Page {current}/{total}". Must be a string. {current} and {total} will be replaced with the current page and the total number of pages.
  */
-module.exports = async (interaction, pages, buttons, timeout = 60000, footer = 'Page {current}/{total}') => {
+module.exports = async (interaction, pages, buttons, timeout = 60000, ephemeral = false, footer = 'Page {current}/{total}') => {
 
     if (!pages) throw new Error("No pages provided.");
     if (pages.length === 1) throw new Error("There is only one page.");
@@ -21,11 +21,7 @@ module.exports = async (interaction, pages, buttons, timeout = 60000, footer = '
     if (typeof footer !== "string") throw new Error("Footer is not a string.");
 
     if (!buttons) throw new Error("No buttons provided.");
-    if (buttons.length !== 4 && buttons.length !== 2) throw new Error("There must be either 2 or 4 buttons.");
-    if (buttons.length === 4 && buttons[0].data.style === ButtonStyle.Link || buttons[1].data.style === ButtonStyle.Link || buttons[2].data.style === ButtonStyle.Link || buttons[3].data.style === ButtonStyle.Link) throw new Error("Buttons cannot be links.");
-    if (buttons.length === 2 && buttons[0].data.style === ButtonStyle.Link || buttons[1].data.style === ButtonStyle.Link) throw new Error("Buttons cannot be links.");
-
-    if (!interaction.deferred) await interaction.deferReply();
+    if (!interaction.deferred) await interaction.deferReply({ ephemeral: ephemeral });
 
     let currentPage = 0;
 
@@ -54,6 +50,7 @@ module.exports = async (interaction, pages, buttons, timeout = 60000, footer = '
             new ActionRowBuilder()
                 .addComponents(initialButtons)
         ],
+        ephemeral: ephemeral
     });
 
     const collector = page.createMessageComponentCollector({
